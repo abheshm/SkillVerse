@@ -41,7 +41,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
         except Technician.DoesNotExist:
             return Response ({'error': 'Technician not found'}, status=status.HTTP_400_BAD_REQUEST)
         
-class BIllViewSet(viewsets.ModelViewSet):
+class BillViewSet(viewsets.ModelViewSet):
     queryset = Bill.objects.all()
     serializer_class = BillSerializer
     permission_classes = [IsAdmin | IsTechnician | IsCustomer ]
