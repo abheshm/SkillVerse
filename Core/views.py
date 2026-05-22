@@ -30,7 +30,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
 
     @action(detail=True , methods=['Post'], permission_classes=[IsAdmin])
     def assign_technician(self, request, pk=None):
-        service_request = self.get_oject()
+        service_request = self.get_object()
         technician_id = request.data.get('technician_id')
         try:
             technician = Technician.objects.get(pk=technician_id)
