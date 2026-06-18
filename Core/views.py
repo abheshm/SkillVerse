@@ -6,47 +6,138 @@ from rest_framework import status
 from .models import User,Bill,ServiceRequest, Technician,Customer
 from .serializers import UserSerializer,BillSerializer,ServiceRequestSerializer,TechnicianSerializer,CustomerSerializer
 from .permissions import IsAdmin,IsTechnician,IsCustomer
-
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated]
+    )
+    def me(self, request):
+
+        serializer = self.get_serializer(
+            request.user
+        )
+
+        return Response(serializer.data)
     # permission_classes = [IsAdmin]
 
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
-    permission_classes = [IsCustomer]
+    # permission_classes = [IsCustomer]
 
 class TechnicianViewSet(viewsets.ModelViewSet):
     queryset = Technician.objects.all()
     serializer_class = TechnicianSerializer
-    permission_classes = [IsTechnician]
+
+    @action(
+    detail=False,
+    methods=['get']
+    )
+    def my_jobs(self, request):
+
+        technician = Technician.objects.get(id=3)
+
+        jobs = ServiceRequest.objects.filter(
+        assigned_technician=technician
+        )
+
+        serializer = ServiceRequestSerializer(
+        jobs,
+        many=True
+        )
+
+        return Response(serializer.data)
+
+    # permission_classes = [IsTechnician]
 
 class ServiceRequestViewSet(viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
     serializer_class = ServiceRequestSerializer
 
-    @action(detail=True , methods=['Post'], permission_classes=[IsAdmin])
+    def perform_create(self, serializer):
+
+        customer = Customer.objects.get(
+            user=self.request.user
+        )
+
+        serializer.save(
+            customer=customer,
+            status='pending'
+        )
+
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[IsAdmin]
+    )
     def assign_technician(self, request, pk=None):
+
         service_request = self.get_object()
-        technician_id = request.data.get('technician_id')
+
+        technician_id = request.data.get(
+            'technician_id'
+        )
+
         try:
-            technician = Technician.objects.get(pk=technician_id)
-            service_request.assigned_technician = technician
+
+            technician = Technician.objects.get(
+                pk=technician_id
+            )
+
+            service_request.assigned_technician = (
+                technician
+            )
+
             service_request.status = 'assigned'
+
             service_request.save()
-            return Response({'status':'Technician assigned'})
+
+            return Response(
+                {'status': 'Technician assigned'}
+            )
+
         except Technician.DoesNotExist:
-            return Response ({'error': 'Technician not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(
+                {'error': 'Technician not found'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
+        
+    @action(detail=True, methods=['post'])
+    def mark_completed(self, request, pk=None):
+
+        service_request = self.get_object()
+
+        service_request.status = 'completed'
+
+        service_request.save()
+
+        return Response({
+            'status': 'Service request marked completed'
+        })   
+    
+
 class BillViewSet(viewsets.ModelViewSet):
     queryset = Bill.objects.all()
     serializer_class = BillSerializer
-    permission_classes = [IsAdmin | IsTechnician | IsCustomer ]
+    # permission_classes = [IsAdmin | IsTechnician | IsCustomer ]
 
 
+from rest_framework.views import APIView
 
+class TestAuthView(APIView):
 
+    def get(self, request):
+
+        return Response({
+            "headers": dict(request.headers)
+        })
 

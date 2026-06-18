@@ -6,7 +6,6 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 class User(AbstractUser):
     ROLE_CHOICES = (
-        ('admin', 'Admin'),
         ('customer', 'Customer'),
         ('technician','Technician')
     )
@@ -66,9 +65,46 @@ class Bill(models.Model):
 
     def __str__(self):
         return f"Bill for request {self.request.id}"
-    
 
 
+class TechnicianApplication(models.Model):
 
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected')
+    )
 
-##test dose 
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    full_name = models.CharField(
+        max_length=100
+    )
+
+    skill = models.CharField(
+        max_length=100
+    )
+
+    experience = models.CharField(
+        max_length=50
+    )
+
+    availability = models.BooleanField(
+        default=True
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.full_name

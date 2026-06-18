@@ -1,4 +1,4 @@
-from .models import Customer,Technician,ServiceRequest,Bill,User
+from .models import Customer,Technician,ServiceRequest,Bill,User,TechnicianApplication
 from rest_framework import serializers
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -6,7 +6,25 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = '__all__'
 
+    
+class TechnicianUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
+
+
 class TechnicianSerializer(serializers.ModelSerializer):
+
+    user = TechnicianUserSerializer(
+        read_only=True
+    )
+
+    user_id = serializers.PrimaryKeyRelatedField(
+    queryset=User.objects.all(),
+    source='user',
+    write_only=True
+    )
+
     class Meta:
         model = Technician
         fields = '__all__'
@@ -15,7 +33,11 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceRequest
         fields = '__all__'
-
+        read_only_fields = (
+            'customer',
+            'status',
+            'created_at',
+        )
 class BillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bill
@@ -44,3 +66,12 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+class TechnicianApplicationSerializer(
+    serializers.ModelSerializer
+):
+
+    class Meta:
+
+        model = TechnicianApplication
+
+        fields = '__all__'
