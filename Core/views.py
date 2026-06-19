@@ -3,8 +3,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
-from .models import User,Bill,ServiceRequest, Technician,Customer
-from .serializers import UserSerializer,BillSerializer,ServiceRequestSerializer,TechnicianSerializer,CustomerSerializer
+from .models import User,Bill,ServiceRequest, Technician,Customer,TechnicianApplication
+from .serializers import UserSerializer,BillSerializer,ServiceRequestSerializer,TechnicianSerializer,CustomerSerializer,TechnicianApplicationSerializer
 from .permissions import IsAdmin,IsTechnician,IsCustomer
 from rest_framework.permissions import IsAuthenticated
 # Create your views here.
@@ -110,7 +110,7 @@ class ServiceRequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        
+
     @action(detail=True, methods=['post'])
     def mark_completed(self, request, pk=None):
 
@@ -140,4 +140,49 @@ class TestAuthView(APIView):
         return Response({
             "headers": dict(request.headers)
         })
+
+class TechnicianApplicationViewSet(
+    viewsets.ModelViewSet
+):
+
+    queryset = (
+        TechnicianApplication.objects.all()
+    )
+
+    serializer_class = (
+        TechnicianApplicationSerializer
+    )
+
+    @action(
+    detail=True,
+    methods=['post']
+    )
+    def approve(self, request, pk=None):
+
+        application = self.get_object()
+
+        if application.status == 'approved':
+
+            return Response(
+                {
+                    'error': 'Application already approved'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        Technician.objects.create(
+            user=application.user,
+            skill=application.skill,
+            availability=application.availability
+        )
+
+        application.status = 'approved'
+
+        application.save()
+
+        return Response(
+            {
+                'status': 'Technician approved'
+            }
+        )
 

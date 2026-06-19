@@ -75,9 +75,9 @@ class TechnicianApplication(models.Model):
         ('rejected', 'Rejected')
     )
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
+    user = models.OneToOneField(
+    User,
+    on_delete=models.CASCADE
     )
 
     full_name = models.CharField(
