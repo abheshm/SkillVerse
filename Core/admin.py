@@ -4,12 +4,15 @@ from .models import Customer
 from .models import Technician
 from .models import ServiceRequest
 from .models import Bill
+from .models import TechnicianApplication
+
 # Register your models here.
 admin.site.register(User)
 admin.site.register(Customer)
 admin.site.register(Technician)
 admin.site.register(ServiceRequest)
 admin.site.register(Bill)
+admin.site.register(TechnicianApplication)
 
 
 
@@ -61,3 +64,6 @@ admin.site.register(Bill)
 #         "groups": [],
 #         "user_permissions": []
 #     }
+# {"id":1,"full_name":"Tech Applicant","skill":"Laptop Repair",
+#  "experience":"2 Years","availability":true,"status":"pending",
+#  "created_at":"2026-06-19T06:50:25.701363Z","user":16}
