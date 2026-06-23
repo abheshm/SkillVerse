@@ -42,7 +42,7 @@ class TechnicianViewSet(viewsets.ModelViewSet):
     )
     def my_jobs(self, request):
 
-        technician = Technician.objects.get(id=3)
+        technician = Technician.objects.get(user=request.user)
 
         jobs = ServiceRequest.objects.filter(
         assigned_technician=technician
@@ -153,6 +153,8 @@ class TechnicianApplicationViewSet(
         TechnicianApplicationSerializer
     )
 
+    permission_classes = [IsAdmin]
+
     @action(
     detail=True,
     methods=['post']
@@ -161,28 +163,53 @@ class TechnicianApplicationViewSet(
 
         application = self.get_object()
 
-        if application.status == 'approved':
 
-            return Response(
-                {
-                    'error': 'Application already approved'
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        Technician.objects.create(
+        technician, created = Technician.objects.get_or_create(
             user=application.user,
-            skill=application.skill,
-            availability=application.availability
-        )
-
-        application.status = 'approved'
-
-        application.save()
-
-        return Response(
-            {
-                'status': 'Technician approved'
+            defaults={
+                "skill": application.skill,
+                "availability": application.availability
             }
         )
 
+
+        application.status = "approved"
+
+        application.save()
+
+
+        return Response(
+            {
+                "status": "Technician approved"
+            }
+        )
+
+class AdminStatsView(APIView):
+
+    permission_classes = [IsAdmin]
+
+
+    def get(self, request):
+
+        customer_count = Customer.objects.count()
+
+        technician_count = Technician.objects.count()
+
+        pending_applications = TechnicianApplication.objects.filter(
+            status="pending"
+        ).count()
+
+        service_request_count = ServiceRequest.objects.count()
+
+
+        return Response({
+
+            "customers": customer_count,
+
+            "technicians": technician_count,
+
+            "pending_applications": pending_applications,
+
+            "service_requests": service_request_count
+
+        })

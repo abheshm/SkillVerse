@@ -1,6 +1,7 @@
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
-from .views import UserViewSet, CustomerViewSet , TechnicianViewSet,ServiceRequestViewSet,BillViewSet,TechnicianApplicationViewSet
+from .views import UserViewSet, CustomerViewSet , TechnicianViewSet,ServiceRequestViewSet,BillViewSet
+from .views import TechnicianApplicationViewSet,AdminStatsView
 
 
 from .views import TestAuthView
@@ -16,6 +17,7 @@ router.register('technician-applications',TechnicianApplicationViewSet)
 urlpatterns = [
     path('api/', include(router.urls)),
     path('api/test-auth/', TestAuthView.as_view()),
+    path('admin-stats/',AdminStatsView.as_view()),
 ]
 
 
