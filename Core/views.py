@@ -183,6 +183,35 @@ class TechnicianApplicationViewSet(
                 "status": "Technician approved"
             }
         )
+    @action(
+    detail=True,
+    methods=['post']
+    )
+    def reject(self, request, pk=None):
+
+        application = self.get_object()
+
+
+        if application.status == 'rejected':
+
+            return Response(
+                {
+                    "error": "Application already rejected"
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+        application.status = "rejected"
+
+        application.save()
+
+
+        return Response(
+            {
+                "status": "Technician application rejected"
+            }
+        )
 
 class AdminStatsView(APIView):
 
