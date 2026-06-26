@@ -213,6 +213,31 @@ class TechnicianApplicationViewSet(
             }
         )
 
+    @action(
+    detail=False,
+    methods=['get'],
+    permission_classes=[IsAuthenticated]
+    )
+    def my_application(self, request):
+
+        application = TechnicianApplication.objects.filter(
+            user=request.user
+        ).first()
+
+        if not application:
+
+            return Response(
+                {
+                    "status": "not_applied"
+                }
+            )
+
+        serializer = self.get_serializer(
+            application
+        )
+
+        return Response(serializer.data)
+
 class AdminStatsView(APIView):
 
     permission_classes = [IsAdmin]
