@@ -30,14 +30,32 @@ class TechnicianSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ServiceRequestSerializer(serializers.ModelSerializer):
+
+    customer_name = serializers.CharField(
+        source="customer.user.username",
+        read_only=True
+    )
+
+    technician_name = serializers.SerializerMethodField()
+
     class Meta:
         model = ServiceRequest
-        fields = '__all__'
+        fields = "__all__"
+
         read_only_fields = (
-            'customer',
-            'status',
-            'created_at',
+            "customer",
+            "status",
+            "created_at",
         )
+
+    def get_technician_name(self, obj):
+
+        if obj.assigned_technician:
+
+            return obj.assigned_technician.user.username
+
+        return None
+    
 class BillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bill
