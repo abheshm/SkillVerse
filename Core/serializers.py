@@ -84,9 +84,7 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class TechnicianApplicationSerializer(
-    serializers.ModelSerializer
-):
+class TechnicianApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
 

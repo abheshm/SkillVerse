@@ -141,9 +141,7 @@ class TestAuthView(APIView):
             "headers": dict(request.headers)
         })
 
-class TechnicianApplicationViewSet(
-    viewsets.ModelViewSet
-):
+class TechnicianApplicationViewSet(viewsets.ModelViewSet):
 
     queryset = (
         TechnicianApplication.objects.all()
@@ -153,7 +151,14 @@ class TechnicianApplicationViewSet(
         TechnicianApplicationSerializer
     )
 
-    permission_classes = [IsAdmin]
+    def get_permissions(self):
+
+        if self.action in ["create", "my_application"]:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdmin]
+
+        return [permission() for permission in permission_classes]
 
     @action(
     detail=True,
